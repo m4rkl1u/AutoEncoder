@@ -130,7 +130,7 @@ public class AutoEncoder {
 
         hiddenNet = new BasicNetwork();
         
-        network.addLayer(new BasicLayer(new ActivationLinear(), true, dataset.getInputSize()));
+        hiddenNet.addLayer(new BasicLayer(new ActivationLinear(), true, dataset.getInputSize()));
         
         for(int i = 0 ; i < params.size(); i ++ ){
             hiddenNet.addLayer(new BasicLayer(params.get(i).func, true, params.get(i).weights.length));
@@ -150,6 +150,10 @@ public class AutoEncoder {
                 }
             }
         }
+        
+    }
+    
+    public void represent(){
         
     }
     
