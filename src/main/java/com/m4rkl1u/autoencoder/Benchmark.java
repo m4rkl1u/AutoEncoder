@@ -43,8 +43,7 @@ public class Benchmark {
             }
         }
 
-       encoder.addLayer(new ActivationTANH(), 1900);
-       encoder.addLayer(new ActivationTANH(), 1000);
-       encoder.addLayer(new ActivationTANH(), 600);
+       encoder.addLayer(new ActivationTANH(), 1600);
+       encoder.addLayer(new ActivationTANH(), 900);
     } 
 }

@@ -24,10 +24,12 @@ public class AutoEncoder {
     public class MLParams{
         public double[] weights;
         public ActivationFunction func;
+        public int nodes;
         
-        public MLParams(double[] weights, ActivationFunction func){
+        public MLParams(double[] weights, ActivationFunction func, int nodes){
             this.weights = weights;
             this.func    = func;
+            this.nodes   = nodes;
         }
     }
     
@@ -89,10 +91,10 @@ public class AutoEncoder {
         
         network.reset();
         
-        train();
+        train(nodes);
     }
     
-    public void train() {
+    public void train(int nodes) {
         Propagation propagation = new QuickPropagation(network, intermediateDataset, 0.01);
         
         propagation.setThreadCount(0);
@@ -121,7 +123,7 @@ public class AutoEncoder {
         ActivationFunction func = network.getActivation(1);
         
         
-        MLParams param = new MLParams(weights, func);
+        MLParams param = new MLParams(weights, func, nodes);
         
         params.add(param);
         
@@ -143,10 +145,10 @@ public class AutoEncoder {
         hiddenNet.addLayer(new BasicLayer(new ActivationLinear(), true, dataset.getInputSize()));
         
         for(int i = 0 ; i < params.size() - 1; i ++ ){
-            hiddenNet.addLayer(new BasicLayer(params.get(i).func, true, params.get(i).weights.length));
+            hiddenNet.addLayer(new BasicLayer(params.get(i).func, true, params.get(i).nodes));
         }
         
-        hiddenNet.addLayer(new BasicLayer(params.get(params.size() - 1).func, false, params.get(params.size() - 1).weights.length));
+        hiddenNet.addLayer(new BasicLayer(params.get(params.size() - 1).func, false, params.get(params.size() - 1).nodes));
         
         hiddenNet.getStructure().finalizeStructure();
         
