@@ -1,4 +1,4 @@
 AutoEncoder
 ===========
 
-auto encode to deep learning
+a auto encoder, a path to deep learning

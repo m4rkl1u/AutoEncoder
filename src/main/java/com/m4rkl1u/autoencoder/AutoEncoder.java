@@ -7,6 +7,7 @@ import java.util.List;
 import org.encog.engine.network.activation.ActivationFunction;
 import org.encog.engine.network.activation.ActivationLinear;
 import org.encog.engine.network.activation.ActivationSigmoid;
+import org.encog.engine.network.activation.ActivationTANH;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
@@ -57,15 +58,24 @@ public class AutoEncoder {
         }
     }
     
+    public void addData(double[] p ){
+        MLDataPair pair = new BasicMLDataPair(new BasicMLData(p), new BasicMLData(p));
+        dataset.add(pair);
+    } 
+    
     public void setFunc(ActivationFunction func){
         this.func = func;
     }
     
     public void addLayer(ActivationFunction func, int nodes){
         
-        buildNetwork();
+        if(params.size() > 0) {
+            buildNetwork();
         
-        transformData();
+            transformData(); 
+        } else {
+            intermediateDataset = this.dataset;
+        }
         
         network = new BasicNetwork();
         
@@ -73,7 +83,7 @@ public class AutoEncoder {
         
         network.addLayer(new BasicLayer(func, true, nodes));
         
-        network.addLayer(new BasicLayer(new ActivationSigmoid(), true, intermediateDataset.getIdealSize()));
+        network.addLayer(new BasicLayer(new ActivationTANH(), false, intermediateDataset.getIdealSize()));
         
         network.getStructure().finalizeStructure();
         
@@ -87,11 +97,11 @@ public class AutoEncoder {
         
         propagation.setThreadCount(0);
         
-        for(int i = 0 ; i < 100; i ++) {
+        //for(int i = 0 ; i < 100; i ++) {
             propagation.iteration();
             
-            System.out.println( "In deep layer:" + params.size() + "Training error " + propagation.getError());
-        }
+            System.out.println( "In deep layer: " + params.size() + " Training error " + propagation.getError());
+        //}
         
         
         int fromNodes = network.getInputCount() + 1;
@@ -100,11 +110,11 @@ public class AutoEncoder {
         int numWeight = fromNodes * toNodes;
         
         double[] weights = new double[numWeight];
-        
+        int k = 0;
         for(int i = 0 ; i < fromNodes; i ++ ){
             for(int j = 0 ; j < toNodes; j ++) {
                 //FIXME, bug
-                weights[i * fromNodes + j] = network.getWeight(0, i, j);
+                weights[k ++] = network.getWeight(0, i, j);
             }
         }
         
@@ -115,7 +125,7 @@ public class AutoEncoder {
         
         params.add(param);
         
-        System.out.println("Add weight: " + Arrays.toString(weights) + "\n and the activation function: " + func.toString());
+        System.out.println("Add weight: " + weights.length + "\n and the activation function: " + func.toString());
     }
 
     private void transformData() {
@@ -132,9 +142,11 @@ public class AutoEncoder {
         
         hiddenNet.addLayer(new BasicLayer(new ActivationLinear(), true, dataset.getInputSize()));
         
-        for(int i = 0 ; i < params.size(); i ++ ){
+        for(int i = 0 ; i < params.size() - 1; i ++ ){
             hiddenNet.addLayer(new BasicLayer(params.get(i).func, true, params.get(i).weights.length));
         }
+        
+        hiddenNet.addLayer(new BasicLayer(params.get(params.size() - 1).func, false, params.get(params.size() - 1).weights.length));
         
         hiddenNet.getStructure().finalizeStructure();
         
