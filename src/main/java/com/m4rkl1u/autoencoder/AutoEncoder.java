@@ -116,7 +116,7 @@ public class AutoEncoder {
         for(int i = 0 ; i < fromNodes; i ++ ){
             for(int j = 0 ; j < toNodes; j ++) {
                 //FIXME, bug
-                weights[k ++] = network.getWeight(0, i, j);
+                weights[k++] = network.getWeight(0, i, j);
             }
         }
         
@@ -167,8 +167,36 @@ public class AutoEncoder {
         
     }
     
-    public void represent(){
+    public double[] represent(int layer){
         
+        assert(layer <= params.size());
+        
+        hiddenNet = new BasicNetwork();
+        
+        hiddenNet.addLayer(new BasicLayer(new ActivationLinear(), true, dataset.getInputSize()));
+        
+        for(int i = 0 ; i < params.size() - 1 && i < layer - 1; i ++ ){
+            hiddenNet.addLayer(new BasicLayer(params.get(i).func, true, params.get(i).nodes));
+        }
+        
+        hiddenNet.addLayer(new BasicLayer(params.get(layer - 1).func, false, params.get(layer - 1).nodes));
+        
+        hiddenNet.getStructure().finalizeStructure();
+        
+        for(int i = 0 ; i < params.size() && i < layer - 1; i ++) {
+            double[] layer_weights = params.get(i).weights;
+            int j = 0;
+            int fromCount = network.getLayerTotalNeuronCount(i);
+            int toCount   = network.getLayerNeuronCount(i + 1);
+            
+            for(int fromNeuron = 0; fromNeuron < fromCount; fromNeuron++){
+                for(int toNeuron = 0; toNeuron < toCount; toNeuron++){
+                    network.setWeight(i, fromNeuron, toNeuron, layer_weights[j++]);
+                }
+            }
+        }
+        
+        return hiddenNet.compute(this.dataset.get(0).getInput()).getData();
     }
     
 }

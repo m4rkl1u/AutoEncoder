@@ -34,9 +34,10 @@ public class Benchmark {
                 
                 double[] input = new double[pixels.length];
                 for(int i = 0 ; i < pixels.length; i ++) {
-                    input[i] = (double)pixels[i] / (128 * 128 * 128 * 2);
-                    assert(input[i] >= -1 && input[i] <= 1);
+                    input[i] = ((double)pixels[i]) / (256 * 256 * 256);
+                    assert(input[i] >= -1. && input[i] <= 1.);
                 }
+                
                 
                 System.out.println("reading file: " + f.getName() + " with size: " + input.length);
                 encoder.addData(input);
@@ -45,5 +46,9 @@ public class Benchmark {
 
        encoder.addLayer(new ActivationTANH(), 1600);
        encoder.addLayer(new ActivationTANH(), 900);
+       
+       double[] fpixels = encoder.represent(2);
+       
+       System.out.println(fpixels[2]);
     } 
 }
